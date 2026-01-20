@@ -1,29 +1,23 @@
-from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
 
 
-class DatabaseSettings(BaseModel):
-    host: str = Field(default="localhost", alias="POSTGRES_HOST")
-    port: int = Field(default=5432, alias="POSTGRES_PORT")
-    user: str = Field(default="analytics", alias="POSTGRES_USER")
-    password: str = Field(default="analytics", alias="POSTGRES_PASSWORD")
-    name: str = Field(default="sabores", alias="POSTGRES_DB")
-
-    @property
-    def url(self) -> str:
-        return (
-            f"postgresql+psycopg2://{self.user}:{self.password}@"
-            f"{self.host}:{self.port}/{self.name}"
-        )
-
-
 class Settings(BaseSettings):
-    database: DatabaseSettings = DatabaseSettings()
+    postgres_host: str = "db"
+    postgres_port: int = 5432
+    postgres_user: str = "analytics"
+    postgres_password: str = "analytics"
+    postgres_db: str = "sabores"
     app_name: str = "sabores-observability"
 
+    def db_url(self) -> str:
+        return (
+            f"postgresql+psycopg2://{self.postgres_user}:{self.postgres_password}@"
+            f"{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        )
+
     class Config:
-        env_nested_delimiter = "__"
-        extra = "ignore"
+        env_prefix = ""
+        case_sensitive = False
 
 
 settings = Settings()  # singleton style
